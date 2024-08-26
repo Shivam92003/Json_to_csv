@@ -1,0 +1,80 @@
+
+# Importing Necessary Libraries
+import json
+import csv
+import os
+# json: This module is used to work with JSON (JavaScript Object Notation) files, which are a common way to store data in a structured format.
+# csv: This module helps you work with CSV (Comma-Separated Values) files, a simple file format for storing tabular data (like a spreadsheet).
+# os: This module provides functions to interact with your computer's operating system, such as reading files from a directory (folder).
+
+
+def get_json_data(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+# This function takes the path of a JSON file as input (file_path), opens the file, reads the data, and returns it as a Python dictionary (a structure that holds key-value pairs).
+
+
+# 3. Writing Data to a CSV File
+def write_csv(data, csv_file_path):
+    keys = data[0].keys()
+
+    with open(csv_file_path, 'w', newline='', encoding='utf-8') as output_file:
+        dict_writer = csv.DictWriter(output_file, fieldnames=keys)
+
+        dict_writer.writeheader()
+
+        for row in data:
+            for key, value in row.items():
+                if isinstance(value, str):
+                    row[key] = value.replace('\n', ' ').replace('\r', ' ')
+                elif isinstance(value, list):
+                    row[key] = [v.replace('\n', ' ').replace('\r', ' ') if isinstance(v, str) else v for v in value]
+            dict_writer.writerow(row)
+# Getting Column Names: The keys variable stores the names of the columns (i.e., the keys of the first JSON object).
+# Opening the CSV File: The open function creates or opens a CSV file for writing.
+# Writing the Header: dict_writer.writeheader() writes the column names (keys) to the first row of the CSV file.
+# Writing Rows: The for loop goes through each row (i.e., each JSON object) in the data list. It ensures that multiline strings (like a job description) are written as a single line in the CSV file by replacing newline characters (\n and \r) with spaces. Finally, dict_writer.writerow(row) writes the processed row to the CSV file.
+
+
+# 4. Defining Directory and File Paths
+json_directory = r'C:\Users\SHIVAM RAWAT\OneDrive\Desktop\insignia\JD_for_Testing'
+csv_file_path = r'C:\Users\SHIVAM RAWAT\OneDrive\Desktop\insignia\JD_for_Testing\output.csv'
+# json_directory: This variable stores the path to the folder where your JSON files are located.
+# csv_file_path: This variable stores the path where the CSV file will be saved
+
+
+# 5. Collecting All JSON Data
+all_data = []
+for file_name in os.listdir(json_directory):
+    if file_name.endswith('.json'):
+        file_path = os.path.join(json_directory, file_name)
+        json_data = get_json_data(file_path)
+        if isinstance(json_data, list):
+            all_data.extend(json_data)
+        else:
+            all_data.append(json_data)
+# all_data: This is an empty list that will hold all the data from your JSON files.
+# Looping Through Files: The for loop goes through each file in the specified directory (json_directory).
+# Filtering JSON Files: The if file_name.endswith('.json'): line ensures that only files with a .json extension are processed.
+# Getting the Full File Path: file_path combines the directory path and the file name to get the full path to each JSON file.
+# Reading JSON Data: json_data = get_json_data(file_path) reads the JSON data from the file.
+# Handling Lists and Dictionaries: The if isinstance(json_data, list): line checks if the JSON file contains a list of dictionaries (which is common when storing multiple records in one file). If it does, the data is added to all_data. If the file contains a single dictionary, it’s added as a single item.
+
+
+
+# 6. Writing the Data to CSV
+if all_data:
+    write_csv(all_data, csv_file_path)
+    print(f"Data from JSON files has been written to {csv_file_path}")
+else:
+    print("No data to write.")
+# Check for Data: The if all_data: line checks if any data was collected from the JSON files.
+# Write to CSV: If data exists, it calls write_csv(all_data, csv_file_path) to write the collected data to the CSV file.
+# Print Confirmation: A message is printed to confirm that the data was successfully written to the CSV file. If no data was found, it prints "No data to write."
+
+
+# Summary
+# The code starts by importing necessary modules and defining functions to read JSON files and write to a CSV file.
+# It then reads all the JSON files in a specified directory, processes the data to ensure that multiline text doesn't break the CSV format, and finally writes all the data into a single CSV file.
+# If the process is successful, it confirms by printing a message; otherwise, it indicates that no data was found.
+
